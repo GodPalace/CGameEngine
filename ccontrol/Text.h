@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "Control.h"
 #include "string"
@@ -7,18 +7,16 @@ namespace ccontrol
 {
     class Text : public Control
     {
-        const char* text;
+        std::string text;
         short strLenOfChar;
-        short strLen;
 
     public:
-        // ReSharper disable once CppNonExplicitConvertingConstructor
-        Text(const char* str) : text(str), strLenOfChar(CalcStrWidth(str)), strLen(strlen(str)) {}
+        explicit Text(const std::string& str) : text(str), strLenOfChar(CalcStrWidth(str)) {}
 
-        const char* GetText() const;
-        void SetText(const char* str);
+        std::string GetText() const;
+        void SetText(const std::string& str);
 
-        void DrawSelf(HANDLE handle) override;
+        void DrawSelf(Graphics* g) override;
 
     private:
         static short CalcStrWidth(const std::string& s);

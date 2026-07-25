@@ -1,5 +1,5 @@
 ﻿#include "Panel.h"
 
-void ccontrol::Panel::DrawSelf(HANDLE handle)
+void ccontrol::Panel::DrawSelf(Graphics* g)
 {
 }

@@ -17,8 +17,6 @@ add_library(CGameEngine SHARED
         cevents/Events.h
         cevents/EventBus.cpp
         cevents/EventBus.h
-        cgame/Screen.cpp
-        cgame/Screen.h
         ccontrol/Control.h
         ccontrol/Control.cpp
         ccontrol/Border.cpp
@@ -27,6 +25,10 @@ add_library(CGameEngine SHARED
         cgutils/Logger.h
         ccontrol/Text.cpp
         ccontrol/Text.h
+        ccontrol/Graphics.cpp
+        ccontrol/Graphics.h
+        ccontrol/FlowPanel.cpp
+        ccontrol/FlowPanel.h
 )
 
 target_compile_definitions(CGameEngine PRIVATE $<$<CONFIG:Debug>:_DEBUG>)

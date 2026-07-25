@@ -1,33 +1,47 @@
 #include "../ccontrol/Border.h"
 #include "../cgame/Console.h"
-#include "../cgame/Screen.h"
 #include "../ccontrol/Text.h"
-#include "../cevents/Events.h"
-#include "typeinfo"
+#include "../cevents/EventBus.h"
 
-ccontrol::Text text = "FPS: 0";
+ccontrol::Text text("FPS: 0");
+ccontrol::Border border;
 
-EventResult RenderListener(cevent::IEvent* event)
+class A : public cevent::Listener
 {
-    if (typeid(*event) != typeid(cevent::RenderEvent)) return CEVENT_CONTINUE;
-    text.SetText(("FPS: " + std::to_string(cgame::GetFps())).c_str());
-    return CEVENT_CONTINUE;
-}
+public:
+    cevent::EventType GetEventType() override
+    {
+        return CEVENT_RENDER;
+    }
+
+    cevent::EventResult HandleEvent(cevent::IEvent* event) override
+    {
+        text.SetText("FPS: " + std::to_string(cgame::GetFps()));
+        return CEVENT_CONTINUE;
+    }
+};
 
 int main()
 {
     cgame::InitConsole();
 
-    cgame::Screen screen;
+    cgame::SetConsoleRootControl(&text);
+    text.fgColor = 0xFF0000;
+    text.bgColor = 0x0000FF;
+    text.x = 0;
+    text.y = 0;
+    text.width = 7;
+    text.height = 1;
 
-    screen.SetRootControl(&text);
-    cgame::SetScreen(&screen);
-    text.x = 10;
-    text.y = 10;
-    text.width = 10;
-    text.height = 10;
+    border.fgColor = 0x00FF00;
+    border.bgColor = 0xFF0000;
+    border.x = 10;
+    border.y = 10;
+    border.width = 10;
+    border.height = 10;
+    text.AddChild(&border);
 
-    cevent::RegisterListener(RenderListener);
+    cevent::RegisterListener(new A());
 
     Sleep(100000);
     cgame::DestroyConsole();

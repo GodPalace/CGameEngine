@@ -1,23 +1,22 @@
 #include "Text.h"
+#include "cstdint"
 
-const char* ccontrol::Text::GetText() const
+std::string ccontrol::Text::GetText() const
 {
     return text;
 }
 
-void ccontrol::Text::SetText(const char* str)
+void ccontrol::Text::SetText(const std::string& str)
 {
     text = str;
-    strLenOfChar = CalcStrWidth(str);
-    strLen = strlen(str);
+    strLenOfChar = CalcStrWidth(text);
 }
 
-void ccontrol::Text::DrawSelf(HANDLE handle)
+void ccontrol::Text::DrawSelf(Graphics* g)
 {
     short tx = x + (width - strLenOfChar) / 2;
     short ty = y + (height - 1) / 2;
-    DWORD written;
-    WriteConsoleOutputCharacter(handle, text, strLen, {tx, ty}, &written);
+    g->DrawText(text, tx, ty, fgColor, bgColor);
 }
 
 int Utf8SeqLen(unsigned char c) {

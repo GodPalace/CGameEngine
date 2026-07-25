@@ -1,8 +1,8 @@
 #pragma once
 
-#include "windows.h"
+#include "Graphics.h"
+#include "cstdint"
 #include "vector"
-#include "../cevents/EventBus.h"
 
 namespace ccontrol
 {
@@ -11,7 +11,8 @@ namespace ccontrol
         std::vector<Control*> children;
 
     public:
-        WORD fgColor = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
+        uint32_t fgColor = 0xFFFFFF;
+        uint32_t bgColor = 0x000000;
 
         short x{};
         short y{};
@@ -23,10 +24,8 @@ namespace ccontrol
         std::vector<Control*> GetChildren();
 
         virtual ~Control() = default;
-        virtual void DrawSelf(HANDLE handle) = 0;
+        virtual void DrawSelf(Graphics* g) = 0;
 
-        void Draw(HANDLE handle);
-        static void DrawRect(HANDLE handle, short x, short y, short w, short h, WORD attr);
-        static void FillRect(HANDLE handle, short x, short y, short w, short h, WORD attr);
+        void Draw(Graphics* g);
     };
 }

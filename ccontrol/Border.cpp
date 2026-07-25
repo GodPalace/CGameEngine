@@ -1,6 +1,6 @@
 #include "Border.h"
 
-void ccontrol::Border::DrawSelf(HANDLE handle)
+void ccontrol::Border::DrawSelf(Graphics* g)
 {
-    DrawRect(handle, x, y, width, height, fgColor);
+    g->DrawRect(x, y, width, height, fgColor, bgColor);
 }

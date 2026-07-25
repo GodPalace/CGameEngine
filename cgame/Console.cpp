@@ -1,7 +1,6 @@
 #include "Console.h"
 
 #include "mutex"
-#include "Screen.h"
 #include "thread"
 #include "windows.h"
 #include "stdexcept"
@@ -9,23 +8,26 @@
 #include "../cevents/Events.h"
 #include "../cgutils/Logger.h"
 
-// 游戏帧率延迟
-long long g_fpsDelay;
-
-// 游戏实际帧率
+// 帧率
 uint8_t g_fps;
-
-// 帧率计算相关变量
 std::chrono::steady_clock::time_point g_lastFpsTime;
+std::chrono::steady_clock::time_point g_lastFrameTime;
 unsigned long long g_frameCount = 0;
+unsigned long long g_targetFrameTimeUs;
 
+// 绘制
 HANDLE g_hOut = nullptr, g_hBuffer = nullptr;
+ccontrol::Graphics* g_graphicsOut = nullptr;
+ccontrol::Graphics* g_graphicsBuffer = nullptr;
+
+// 窗口
 COORD g_size;
 WORD g_attr;
 
-cgame::Screen* g_screen = nullptr;
-std::condition_variable g_screenCV;
-std::mutex g_screenMutex;
+// Root Control
+ccontrol::Control* g_rootControl = nullptr;
+std::condition_variable g_rootControlCV;
+std::mutex g_rootControlMutex;
 
 void InitConsoleMode()
 {
@@ -55,7 +57,7 @@ void GameLoopThread()
 {
     while (true)
     {
-        if (g_screen != nullptr)
+        if (g_rootControl != nullptr)
         {
             cevent::GameTickEvent event;
             event.atTickFront = true;
@@ -84,25 +86,37 @@ void GameLoopThread()
 
             event.atTickFront = false;
             cevent::DispatchEvent(&event);
+
+            // 控制帧率
+            if (g_targetFrameTimeUs != 0)
+            {
+                auto frameEndTime = std::chrono::steady_clock::now();
+                auto frameTimeUs = std::chrono::duration_cast<std::chrono::microseconds>(frameEndTime - g_lastFrameTime).count();
+                if (frameTimeUs < g_targetFrameTimeUs)
+                {
+                    std::this_thread::sleep_for(std::chrono::microseconds(g_targetFrameTimeUs - frameTimeUs));
+                }
+
+                g_lastFrameTime = frameEndTime;
+            }
         }
         else
         {
             // 等待屏幕被设置
-            std::unique_lock lock(g_screenMutex);
-            g_screenCV.wait(lock, [] { return g_screen != nullptr; });
+            std::unique_lock lock(g_rootControlMutex);
+            g_rootControlCV.wait(lock, [] { return g_rootControl != nullptr; });
         }
-
-        // 控制帧率
-        std::this_thread::sleep_for(std::chrono::milliseconds(g_fpsDelay));
     }
 }
 
-void cgame::InitConsole(int fps)
+void cgame::InitConsole(uint32_t fps)
 {
-    g_fpsDelay = fps == 0 ? 0 : static_cast<long long>(1000 / fps);
+    g_targetFrameTimeUs = fps != 0 ? 1000000 / fps : 0;
     g_lastFpsTime = std::chrono::steady_clock::now();
+    g_lastFrameTime = std::chrono::steady_clock::now();
     g_frameCount = 0;
     g_fps = 0;
+
     InitConsoleMode();
 
     // 设置代码页
@@ -114,6 +128,7 @@ void cgame::InitConsole(int fps)
     {
         throw std::runtime_error("Failed to get output handle");
     }
+    g_graphicsOut = new ccontrol::Graphics(g_hOut);
 
     // 获取窗口大小
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -126,6 +141,7 @@ void cgame::InitConsole(int fps)
     {
         throw std::runtime_error("Failed to create buffer");
     }
+    g_graphicsBuffer = new ccontrol::Graphics(g_hBuffer);
 
     // 关闭光标
     HideCursor(g_hOut);
@@ -148,6 +164,11 @@ void cgame::DestroyConsole()
     if (g_hOut) CloseHandle(g_hOut);
     g_hBuffer = nullptr;
     g_hOut = nullptr;
+
+    delete g_graphicsOut;
+    delete g_graphicsBuffer;
+    g_graphicsOut = nullptr;
+    g_graphicsBuffer = nullptr;
 }
 
 short cgame::GetConsoleWidth()
@@ -165,16 +186,16 @@ WORD cgame::GetConsoleAttribute()
     return g_attr;
 }
 
-void cgame::SetScreen(Screen* screen)
+void cgame::SetConsoleRootControl(ccontrol::Control* control)
 {
-    std::lock_guard lock(g_screenMutex);
-    g_screen = screen;
-    g_screenCV.notify_one();
+    std::lock_guard lock(g_rootControlMutex);
+    g_rootControl = control;
+    g_rootControlCV.notify_one();
 }
 
-cgame::Screen* cgame::GetScreen()
+ccontrol::Control* cgame::GetConsoleRootControl()
 {
-    return g_screen;
+    return g_rootControl;
 }
 
 void cgame::SetConsoleBgColor(uint32_t color)
@@ -194,13 +215,14 @@ void SwapBuffer()
 {
     SetConsoleActiveScreenBuffer(g_hBuffer);
     std::swap(g_hOut, g_hBuffer);
+    std::swap(g_graphicsOut, g_graphicsBuffer);
 }
 
 // 绘制
 void cgame::Draw()
 {
-    if (g_screen == nullptr) return;
-    g_screen->Draw(g_hBuffer);
+    if (g_rootControl == nullptr) return;
+    g_rootControl->Draw(g_graphicsBuffer);
 }
 
 // 渲染绘制
@@ -212,24 +234,21 @@ void cgame::Render()
 // 清理后台缓冲区
 void cgame::ClearBuffer()
 {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    GetConsoleScreenBufferInfo(g_hBuffer, &csbi);
-
-    DWORD bufSize = csbi.dwSize.X * csbi.dwSize.Y;
+    DWORD size = g_size.X * g_size.Y;
     DWORD written;
 
     FillConsoleOutputCharacter(
         g_hBuffer,
         ' ',
-        bufSize,
+        size,
         {0, 0},
         &written
     );
 
     FillConsoleOutputAttribute(
         g_hBuffer,
-        csbi.wAttributes,
-        bufSize,
+        g_attr,
+        size,
         {0, 0},
         &written
     );

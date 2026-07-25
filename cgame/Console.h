@@ -2,21 +2,21 @@
 
 #include "windows.h"
 #include "cstdint"
+#include "../ccontrol/Control.h"
 
 namespace cgame
 {
     class Screen;
 
-    // 当fps=0时不限制帧率
-    void InitConsole(int fps = 30);
+    void InitConsole(uint32_t fps = 60);
     void DestroyConsole();
 
     short GetConsoleWidth();
     short GetConsoleHeight();
     WORD GetConsoleAttribute();
 
-    void SetScreen(Screen* screen);
-    Screen* GetScreen();
+    void SetConsoleRootControl(ccontrol::Control* control);
+    ccontrol::Control* GetConsoleRootControl();
 
     void SetConsoleBgColor(uint32_t color);
     void SetConsoleFgColor(uint32_t color);

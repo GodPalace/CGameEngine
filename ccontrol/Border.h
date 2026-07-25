@@ -7,6 +7,6 @@ namespace ccontrol
     class Border : public Control
     {
     public:
-        void DrawSelf(HANDLE handle) override;
+        void DrawSelf(Graphics* g) override;
     };
 }

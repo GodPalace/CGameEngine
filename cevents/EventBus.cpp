@@ -5,30 +5,31 @@
 #include "windows.h"
 #include "stdexcept"
 
-std::vector<LISTENER> g_listeners;
+std::vector<cevent::Listener*> g_listeners;
 HANDLE g_hIn = nullptr;
 INPUT_RECORD g_ir[32];
 DWORD g_events;
 
-EventResult cevent::DispatchEvent(IEvent* event)
+cevent::EventResult cevent::DispatchEvent(IEvent* event)
 {
     if (g_listeners.empty()) return CEVENT_CONTINUE;
 
     for (auto listener : g_listeners)
     {
-        EventResult result = listener(event);
+        if (listener->GetEventType() != event->GetEventType()) continue;
+        EventResult result = listener->HandleEvent(event);
         if (result != CEVENT_CONTINUE) return result;
     }
 
     return CEVENT_CONTINUE;
 }
 
-void cevent::RegisterListener(LISTENER listener)
+void cevent::RegisterListener(Listener* listener)
 {
     g_listeners.push_back(listener);
 }
 
-void cevent::UnregisterListener(LISTENER listener)
+void cevent::UnregisterListener(Listener* listener)
 {
     g_listeners.erase(std::ranges::remove(g_listeners, listener).begin(), g_listeners.end());
 }
