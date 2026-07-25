@@ -1,45 +1,57 @@
 #include "../ccontrol/Border.h"
+#include "../ccontrol/FlowPanel.h"
 #include "../cgame/Console.h"
 #include "../ccontrol/Text.h"
 #include "../cevents/EventBus.h"
 
-ccontrol::Text text("FPS: 0");
-ccontrol::Border border;
+static ccontrol::FlowPanel flowPanel;
+static ccontrol::Text text("FPS: 0");
+static ccontrol::Border border;
 
-class A : public cevent::Listener
+namespace
 {
-public:
-    cevent::EventType GetEventType() override
+    class A : public cevent::Listener
     {
-        return CEVENT_RENDER;
-    }
+    public:
+        cevent::EventType GetEventType() override
+        {
+            return CEVENT_RENDER;
+        }
 
-    cevent::EventResult HandleEvent(cevent::IEvent* event) override
-    {
-        text.SetText("FPS: " + std::to_string(cgame::GetFps()));
-        return CEVENT_CONTINUE;
-    }
-};
+        cevent::EventResult HandleEvent(cevent::IEvent* event) override
+        {
+            text.SetText("FPS: " + std::to_string(cgame::GetFps()));
+            return CEVENT_CONTINUE;
+        }
+    };
+}
 
 int main()
 {
     cgame::InitConsole();
 
-    cgame::SetConsoleRootControl(&text);
+    flowPanel.x = 0;
+    flowPanel.y = 0;
+    flowPanel.width = 50;
+    flowPanel.height = 50;
+
     text.fgColor = 0xFF0000;
     text.bgColor = 0x0000FF;
-    text.x = 0;
-    text.y = 0;
     text.width = 7;
     text.height = 1;
 
     border.fgColor = 0x00FF00;
     border.bgColor = 0xFF0000;
-    border.x = 10;
-    border.y = 10;
     border.width = 10;
     border.height = 10;
-    text.AddChild(&border);
+
+    flowPanel.AddChild(&text);
+    flowPanel.AddChild(new ccontrol::Text("a"));
+    flowPanel.AddChild(new ccontrol::Text("b"));
+    flowPanel.AddChild(new ccontrol::Text("c"));
+    flowPanel.AddChild(new ccontrol::Text("d"));
+    flowPanel.AddChild(&border);
+    cgame::SetConsoleRootControl(&flowPanel);
 
     cevent::RegisterListener(new A());
 

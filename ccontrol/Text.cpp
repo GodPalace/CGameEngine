@@ -19,7 +19,7 @@ void ccontrol::Text::DrawSelf(Graphics* g)
     g->DrawText(text, tx, ty, fgColor, bgColor);
 }
 
-int Utf8SeqLen(unsigned char c) {
+static int Utf8SeqLen(unsigned char c) {
     if (c < 0x80) return 1;
     if ((c & 0xE0) == 0xC0) return 2;
     if ((c & 0xF0) == 0xE0) return 3;
@@ -27,7 +27,7 @@ int Utf8SeqLen(unsigned char c) {
     return 1; // 无效的 UTF-8 序列，按单字节处理
 }
 
-uint32_t DecodeUtf8(const std::string& s, size_t& i) {
+static uint32_t DecodeUtf8(const std::string& s, size_t& i) {
     if (i >= s.size()) return 0xFFFD; // 替换字符
 
     uint32_t cp = static_cast<unsigned char>(s[i++]);
@@ -60,7 +60,7 @@ uint32_t DecodeUtf8(const std::string& s, size_t& i) {
 
 // 判断字符是否为宽字符（基于 Unicode East Asian Width 属性）
 // 宽字符包括：Wide (W), Fullwidth (F), Ambiguous (A) 在东亚环境中
-bool IsWideChar(uint32_t cp) {
+static bool IsWideChar(uint32_t cp) {
     // CJK 统一汉字及扩展
     if (cp >= 0x4E00 && cp <= 0x9FFF) return true;  // CJK Unified Ideographs
     if (cp >= 0x3400 && cp <= 0x4DBF) return true;  // CJK Unified Ideographs Extension A

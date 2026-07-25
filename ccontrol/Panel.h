@@ -6,7 +6,6 @@ namespace ccontrol
 {
     class Panel : public Control
     {
-    public:
-        void DrawSelf(Graphics* g) override;
+        void DrawSelf(Graphics* g) override {}
     };
 }

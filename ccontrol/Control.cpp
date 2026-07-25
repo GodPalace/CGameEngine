@@ -4,6 +4,7 @@
 void ccontrol::Control::AddChild(Control* child)
 {
     children.push_back(child);
+    UpdateChildPos(child);
 }
 
 void ccontrol::Control::RemoveChild(Control* child)
@@ -18,6 +19,8 @@ std::vector<ccontrol::Control*> ccontrol::Control::GetChildren()
 
 void ccontrol::Control::Draw(Graphics* g)
 {
+    DrawBg(g);
+
     for (auto child : children)
     {
         child->Draw(g);
@@ -25,3 +28,9 @@ void ccontrol::Control::Draw(Graphics* g)
 
     DrawSelf(g);
 }
+
+void ccontrol::Control::DrawBg(const Graphics* g) const
+{
+    g->FillRect(x, y, width, height, bgColor);
+}
+
