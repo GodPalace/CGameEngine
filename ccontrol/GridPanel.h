@@ -4,19 +4,19 @@
 
 namespace ccontrol
 {
-    class FlowPanel : public Panel
+    class GridPanel : public Panel
     {
         void UpdateChild(Control* child) override;
         void DrawSelf(Graphics* g) override {}
 
     public:
-        short margin = 1;
-        short xSpacing = 1;
-        short ySpacing = 1;
+        short rows = 1;
+        short cols = 1;
+        short margin = 0;
+        short xSpacing = 0;
+        short ySpacing = 0;
 
     private:
-        short curX = 0;
-        short curY = 0;
-        short maxHeight = 0;
+        short curIndex = 0;
     };
 }

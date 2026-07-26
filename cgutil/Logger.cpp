@@ -1,6 +1,6 @@
 ﻿#include "Logger.h"
 
-FILE* g_logFile = nullptr;
+static FILE* g_logFile = nullptr;
 
 void cutil::Logger(const std::string& message)
 {

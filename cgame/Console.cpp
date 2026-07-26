@@ -4,32 +4,32 @@
 #include "thread"
 #include "windows.h"
 #include "stdexcept"
-#include "../cevents/EventBus.h"
-#include "../cevents/Events.h"
-#include "../cgutils/Logger.h"
+#include "../cevent/EventBus.h"
+#include "../cevent/Events.h"
+#include "../cgutil/Logger.h"
 
 // 帧率
-uint8_t g_fps;
-std::chrono::steady_clock::time_point g_lastFpsTime;
-std::chrono::steady_clock::time_point g_lastFrameTime;
-unsigned long long g_frameCount = 0;
-unsigned long long g_targetFrameTimeUs;
+static uint8_t g_fps;
+static std::chrono::steady_clock::time_point g_lastFpsTime;
+static std::chrono::steady_clock::time_point g_lastFrameTime;
+static unsigned long long g_frameCount = 0;
+static unsigned long long g_targetFrameTimeUs;
 
 // 绘制
-HANDLE g_hOut = nullptr, g_hBuffer = nullptr;
-ccontrol::Graphics* g_graphicsOut = nullptr;
-ccontrol::Graphics* g_graphicsBuffer = nullptr;
+static HANDLE g_hOut = nullptr, g_hBuffer = nullptr;
+static ccontrol::Graphics* g_graphicsOut = nullptr;
+static ccontrol::Graphics* g_graphicsBuffer = nullptr;
 
 // 窗口
-COORD g_size;
-WORD g_attr;
+static COORD g_size;
+static WORD g_attr;
 
 // Root Control
-ccontrol::Control* g_rootControl = nullptr;
-std::condition_variable g_rootControlCV;
-std::mutex g_rootControlMutex;
+static ccontrol::Control* g_rootControl = nullptr;
+static std::condition_variable g_rootControlCV;
+static std::mutex g_rootControlMutex;
 
-void InitConsoleMode()
+static void InitConsoleMode()
 {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
     DWORD mode = 0;
@@ -44,7 +44,7 @@ void InitConsoleMode()
         ~ENABLE_QUICK_EDIT_MODE);
 }
 
-void HideCursor(HANDLE handle)
+static void HideCursor(HANDLE handle)
 {
     CONSOLE_CURSOR_INFO ci;
     GetConsoleCursorInfo(handle, &ci);
@@ -53,7 +53,7 @@ void HideCursor(HANDLE handle)
 }
 
 [[noreturn]]
-void GameLoopThread()
+static void GameLoopThread()
 {
     while (true)
     {

@@ -28,7 +28,7 @@ namespace ccontrol
         void Draw(Graphics* g);
 
     private:
-        virtual void UpdateChildPos(Control* child) = 0;
+        virtual void UpdateChild(Control* child) = 0;
 
         virtual void DrawSelf(Graphics* g) = 0;
         void DrawBg(const Graphics* g) const;

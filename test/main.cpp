@@ -1,10 +1,10 @@
 #include "../ccontrol/Border.h"
-#include "../ccontrol/FlowPanel.h"
+#include "../ccontrol/GridPanel.h"
 #include "../cgame/Console.h"
 #include "../ccontrol/Text.h"
-#include "../cevents/EventBus.h"
+#include "../cevent/EventBus.h"
 
-static ccontrol::FlowPanel flowPanel;
+static ccontrol::GridPanel panel;
 static ccontrol::Text text("FPS: 0");
 static ccontrol::Border border;
 
@@ -30,10 +30,14 @@ int main()
 {
     cgame::InitConsole();
 
-    flowPanel.x = 0;
-    flowPanel.y = 0;
-    flowPanel.width = 50;
-    flowPanel.height = 50;
+    panel.xSpacing = 1;
+    panel.ySpacing = 1;
+    panel.rows = 2;
+    panel.cols = 3;
+    panel.x = 0;
+    panel.y = 0;
+    panel.width = 30;
+    panel.height = 15;
 
     text.fgColor = 0xFF0000;
     text.bgColor = 0x0000FF;
@@ -45,13 +49,13 @@ int main()
     border.width = 10;
     border.height = 10;
 
-    flowPanel.AddChild(&text);
-    flowPanel.AddChild(new ccontrol::Text("a"));
-    flowPanel.AddChild(new ccontrol::Text("b"));
-    flowPanel.AddChild(new ccontrol::Text("c"));
-    flowPanel.AddChild(new ccontrol::Text("d"));
-    flowPanel.AddChild(&border);
-    cgame::SetConsoleRootControl(&flowPanel);
+    panel.AddChild(&text);
+    panel.AddChild(new ccontrol::Border());
+    panel.AddChild(new ccontrol::Border());
+    panel.AddChild(new ccontrol::Border());
+    panel.AddChild(new ccontrol::Border());
+    panel.AddChild(&border);
+    cgame::SetConsoleRootControl(&panel);
 
     cevent::RegisterListener(new A());
 

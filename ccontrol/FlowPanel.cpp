@@ -1,19 +1,19 @@
 ﻿#include "FlowPanel.h"
 
-void ccontrol::FlowPanel::UpdateChildPos(Control* child)
+void ccontrol::FlowPanel::UpdateChild(Control* child)
 {
-    if (nextX + child->width + xSpacing <= width)
+    if (margin * 2 + curX + child->width <= width)
     {
         maxHeight = std::max(maxHeight, child->height);
     }
     else
     {
-        nextX = xSpacing;
-        nextY += maxHeight + ySpacing;
+        curX = 0;
+        curY += maxHeight + ySpacing;
         maxHeight = child->height;
     }
 
-    child->x = nextX;
-    child->y = nextY;
-    nextX += child->width + xSpacing;
+    child->x = x + margin + curX;
+    child->y = y + margin + curY;
+    curX += child->width + xSpacing;
 }

@@ -4,7 +4,7 @@
 void ccontrol::Control::AddChild(Control* child)
 {
     children.push_back(child);
-    UpdateChildPos(child);
+    UpdateChild(child);
 }
 
 void ccontrol::Control::RemoveChild(Control* child)

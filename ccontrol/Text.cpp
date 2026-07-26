@@ -16,7 +16,7 @@ void ccontrol::Text::DrawSelf(Graphics* g)
 {
     short tx = x + (width - strLenOfChar) / 2;
     short ty = y + (height - 1) / 2;
-    g->DrawText(text, tx, ty, fgColor, bgColor);
+    g->DrawText(text, tx, ty, fgColor, textBgColor);
 }
 
 static int Utf8SeqLen(unsigned char c) {

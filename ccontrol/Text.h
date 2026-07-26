@@ -11,9 +11,11 @@ namespace ccontrol
         short strLenOfChar;
 
         void DrawSelf(Graphics* g) override;
-        void UpdateChildPos(Control* child) override {}
+        void UpdateChild(Control* child) override {}
 
     public:
+        uint32_t textBgColor = 0x000000;
+
         explicit Text(const std::string& str) : text(str), strLenOfChar(CalcStrWidth(str)) {}
 
         std::string GetText() const;

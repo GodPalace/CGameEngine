@@ -5,10 +5,10 @@
 #include "windows.h"
 #include "stdexcept"
 
-std::vector<cevent::Listener*> g_listeners;
-HANDLE g_hIn = nullptr;
-INPUT_RECORD g_ir[32];
-DWORD g_events;
+static std::vector<cevent::Listener*> g_listeners;
+static HANDLE g_hIn = nullptr;
+static INPUT_RECORD g_ir[32];
+static DWORD g_events;
 
 cevent::EventResult cevent::DispatchEvent(IEvent* event)
 {
@@ -76,12 +76,38 @@ void cevent::ProcessEvent()
             {
                 auto &mouse = g_ir[i].Event.MouseEvent;
 
-                if (mouse.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED)
+                if (mouse.dwButtonState & FROM_LEFT_1ST_BUTTON_PRESSED) // 左键
                 {
                     MouseButtonEvent event;
-                    event.button = mouse.dwButtonState;
-                    event.isPressed = true;
-                    event.isRepeat = false;
+                    event.button = LEFT;
+                    event.isRepeat = mouse.dwEventFlags & DOUBLE_CLICK;
+                    DispatchEvent(&event);
+                }
+                else if (mouse.dwButtonState & FROM_LEFT_2ND_BUTTON_PRESSED) // 中键
+                {
+                    MouseButtonEvent event;
+                    event.button = MIDDLE;
+                    event.isRepeat = mouse.dwEventFlags & DOUBLE_CLICK;
+                    DispatchEvent(&event);
+                }
+                else if (mouse.dwButtonState & RIGHTMOST_BUTTON_PRESSED) // 右键
+                {
+                    MouseButtonEvent event;
+                    event.button = RIGHT;
+                    event.isRepeat = mouse.dwEventFlags & DOUBLE_CLICK;
+                    DispatchEvent(&event);
+                }
+                else if (mouse.dwEventFlags & MOUSE_MOVED)
+                {
+                    MouseMotionEvent event;
+                    event.x = mouse.dwMousePosition.X;
+                    event.y = mouse.dwMousePosition.Y;
+                    DispatchEvent(&event);
+                }
+                else if (mouse.dwEventFlags & MOUSE_WHEELED)
+                {
+                    MouseWheelEvent event;
+                    event.wheel = mouse.dwButtonState >> 16;
                     DispatchEvent(&event);
                 }
             }

@@ -75,11 +75,17 @@ namespace cevent
         }
     };
 
+    enum MouseButton
+    {
+        LEFT,
+        MIDDLE,
+        RIGHT
+    };
+
     class MouseButtonEvent : public MouseEvent
     {
     public:
-        unsigned long button;
-        bool isPressed;
+        MouseButton button;
         bool isRepeat;
 
         EventType GetEventType() override
